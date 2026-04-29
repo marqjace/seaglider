@@ -6,7 +6,7 @@
 
 ## oxy_gain_correction.py
 - Lives in /grg/seaglider-proc/YYYYMMDD_sgXXX/software.
-  - Example to run: ```/home/server/hpc/grg/pixi_env/.pixi/envs/default/bin/python oxy_gain_correction.py "/home/server/pi/homes/marqjace/grg/seaglider-raw/20251111_sg686/real-time" --gain 1.0689```
+  - Example to run: ```/home/server/hpc/grg/pixi_env/.pixi/envs/default/bin/python oxy_gain_correction.py "20251111_sg686" --gain 1.0345```
   - Searches the given directory in seaglider-raw and applies a gain correction to 'aanderaa4831_dissolved_oxygen' and saves the processed files in seaglider-proc. The corrected oxygen data is named 'aanderaa4831_dissolved_oxygen_adjusted'.
 
 ## glider_to_IOOS_seaglider.m/.py

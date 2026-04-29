@@ -4,16 +4,18 @@ import argparse
 import xarray as xr
 # from pathlib import Path
 
-def oxy_gain_correction(data_dir, gain=1.0):
+def oxy_gain_correction(mission, gain=1.0):
     """Function for post-processing of Seaglider data.
     
     Args:
-        data_dir (str): Directory containing the dive files.
+        mission (str): Mission name (e.g., '20260314_sg266').
+        gain (float): Gain factor for oxygen correction.
     
     Returns:
         None
     """
     # Extract glider ID from directory structure and find all dive files
+    data_dir = f'/home/server/pi/homes/marqjace/grg/seaglider-raw/{mission}/real-time'
     files = [f for f in os.listdir(data_dir) if f.endswith(".nc")]
     if not files:
         raise ValueError("No .nc files found")
@@ -57,7 +59,7 @@ def oxy_gain_correction(data_dir, gain=1.0):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Apply oxygen gain correction to Seaglider data.")
-    parser.add_argument("data_dir", type=str, help="Directory containing the per-dive .nc files")
+    parser.add_argument("mission", type=float, help="Mission name (e.g., '20260314_sg266')")
     parser.add_argument("--gain", type=float, default=1.0,
                             help="Gain factor for oxygen correction (default: 1.0)")
 
