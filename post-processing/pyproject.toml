@@ -5,9 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
+    "cftime>=1.6.4.post1",
     "cmocean>=4.0.3",
     "matplotlib>=3.9.4",
+    "netcdf4>=1.7.2",
     "numpy>=2.0.2",
     "pandas>=2.3.3",
+    "scipy>=1.13.1",
     "xarray>=2024.7.0",
+]
+
+[tool.uv.workspace]
+members = [
+    "ph-processing",
 ]
