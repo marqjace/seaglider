@@ -59,10 +59,10 @@ def oxy_gain_correction(mission, gain=1.0):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Apply oxygen gain correction to Seaglider data.")
-    parser.add_argument("mission", type=float, help="Mission name (e.g., '20260314_sg266')")
+    parser.add_argument("mission", type=str, help="Mission name (e.g., '20260314_sg266')")
     parser.add_argument("--gain", type=float, default=1.0,
                             help="Gain factor for oxygen correction (default: 1.0)")
 
     args = parser.parse_args()
 
-    oxy_gain_correction(args.data_dir, args.gain)
+    oxy_gain_correction(args.mission, args.gain)

@@ -61,7 +61,7 @@ def sg_to_IOOS(filepath):
 
     for var in vars_to_interp:
         if var in ds:
-            # ds[var] = ds[var].interpolate_na(dim="time")
+            ds[var] = ds[var].interpolate_na(dim="time")
             # ds[var] = ds[var].reindex(time=ds["temperature"].time, method="linear")
             ds[var] = ds[var].interp(time=ds["temperature"].time)
             ds = ds.rename_vars({'wlbbfl2_sig695nm_adjusted': 'fluorescence',
