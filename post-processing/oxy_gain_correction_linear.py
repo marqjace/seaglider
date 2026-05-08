@@ -77,12 +77,22 @@ def oxy_gain_correction(mission, start_gain=1.0, end_gain=1.0):
 
         print(f'Processing file {f} with gain {gain:.4f} ...')
 
+        output_file = os.path.join(
+                    processed_dir,
+                    os.path.basename(f)
+                )
+
         try:
             with xr.open_dataset(
                 f,
                 drop_variables=['compass_timeouts_times_truck'],
                 decode_timedelta=False
             ) as ds:
+                
+                if 'aanderaa4831_dissolved_oxygen' not in ds:
+                    print(f"'aanderaa4831_dissolved_oxygen' not found in {f}. Saving original file.")
+                    ds.to_netcdf(output_file)
+                    continue
 
                 oxy = ds['aanderaa4831_dissolved_oxygen'].values
 
@@ -110,11 +120,6 @@ def oxy_gain_correction(mission, start_gain=1.0, end_gain=1.0):
 
                 var.attrs['platform'] = 'glider'
                 var.attrs['instrument'] = 'aa4831'
-
-                output_file = os.path.join(
-                    processed_dir,
-                    os.path.basename(f)
-                )
 
                 ds_corrected.to_netcdf(output_file)
 
