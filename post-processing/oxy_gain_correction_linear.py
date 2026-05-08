@@ -1,26 +1,34 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import glob
 import argparse
 import numpy as np
 import xarray as xr
+from datetime import datetime
 
 def oxy_gain_correction(mission, start_gain=1.0, end_gain=1.0):
-    """Function for post-processing of Seaglider data."""
+    """Function for post-processing of Seaglider data.
+    Input:
+        mission (str): The name of the mission.
+        start_gain (float): The initial gain value.
+        end_gain (float): The final gain value.
+    Output:
+        Data file (.nc):Reprocessed Seaglider data with the linearly corrected oxygen gain.
+        Log file (.log): oxy_gain_correction_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.log.
+    """
 
     # Extract glider ID from directory structure and find all dive files
-    # data_dir = f'/home/server/pi/homes/marqjace/grg/seaglider-raw/{mission}/real-time'
-    data_dir = f'C:/Users/marqjace/data/seaglider/sg686/{mission}'
+    data_dir = f'/home/server/pi/homes/marqjace/grg/seaglider-raw/{mission}/real-time'
 
     files = [f for f in os.listdir(data_dir) if f.endswith(".nc")]
     if not files:
         raise ValueError("No .nc files found")
 
-    # glider_id = files[0][1:4]
-    glider_id = "686"
+    glider_id = files[0][1:4]
 
-    dive_files = sorted(glob.glob(os.path.join(data_dir, f"p{glider_id}*.nc")))    ### Change to f"p{glider_id}*.nc" for actual file. 
+    dive_files = sorted(glob.glob(os.path.join(data_dir, f"p{glider_id}*.nc")))
 
     print(f"Found {len(dive_files)} files")
     print(f"glider_id: {glider_id}")
@@ -60,8 +68,7 @@ def oxy_gain_correction(mission, start_gain=1.0, end_gain=1.0):
 
     # ---------------------------------------------------------
 
-    # processed_dir = f'/home/server/pi/homes/marqjace/grg/seaglider-proc/{mission}/real-time'
-    processed_dir = f'C:/Users/marqjace/data/seaglider/sg686/{mission}/processed'
+    processed_dir = f'/home/server/pi/homes/marqjace/grg/seaglider-proc/{mission}/real-time'
 
     os.makedirs(processed_dir, exist_ok=True)
 
@@ -145,6 +152,23 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    
+    
+    # Build log directory and file
+    log_dir = f'/home/server/pi/homes/marqjace/grg/seaglider-proc/{args.mission}/real-time/logs'
+    os.makedirs(log_dir, exist_ok=True)
+    
+    
+    logfile = os.path.join(
+        log_dir,
+        f"oxy_gain_correction_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.log"
+    )
+
+    # Redirect stdout + stderr to file
+    sys.stdout = open(logfile, 'w')
+    sys.stderr = sys.stdout
+
+    print(f"Logging to {logfile}")
 
     oxy_gain_correction(
         args.mission,

@@ -61,19 +61,31 @@ def sg_to_IOOS(filepath):
 
     for var in vars_to_interp:
         if var in ds:
-            ds[var] = ds[var].interpolate_na(dim="time")
-            # ds[var] = ds[var].reindex(time=ds["temperature"].time, method="linear")
-            ds[var] = ds[var].interp(time=ds["temperature"].time)
-            ds = ds.rename_vars({'wlbbfl2_sig695nm_adjusted': 'fluorescence',
-                                 'wlbbfl2_sig460nm_adjusted': 'cdom',
-                                 'wlbbfl2_sig700nm_adjusted': 'opbs'})
-            processed_any = True
+            try:
+                ds[var] = ds[var].interp(time=ds["temperature"].time)
+                processed_any = True
+            except Exception as e:
+                print(f"\n{filepath}: failed on {var}: {e}")
         else:
             print(f"\n{filepath}: missing {var}, skipping")
 
     if not processed_any:
         print(f"\nSkipping {filepath}: no variables found")
         return
+    
+    
+    rename_map = {
+        'wlbbfl2_sig695nm_adjusted': 'fluorescence',
+        'wlbbfl2_sig460nm_adjusted': 'cdom',
+        'wlbbfl2_sig700nm_adjusted': 'opbs'
+    }
+
+    # Keep only variables that exist in the dataset
+    rename_map = {k: v for k, v in rename_map.items() if k in ds}
+
+    # Only rename if there's something to rename
+    if rename_map:
+        ds = ds.rename_vars(rename_map)
 
     out_dir = os.path.join(os.path.dirname(filepath), "gliderdac_proc")
 
@@ -104,7 +116,7 @@ def main():
 
     args = parser.parse_args()
 
-    files = glob.glob(os.path.join(args.input_dir, "*.nc"))
+    files = sorted(glob.glob(os.path.join(args.input_dir, "*.nc")))
 
     if not files:
         print(f"\nNo files found in {args.input_dir}")
