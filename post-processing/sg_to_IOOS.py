@@ -75,9 +75,9 @@ def sg_to_IOOS(filepath):
     
     
     rename_map = {
-        'wlbbfl2_sig695nm_adjusted': 'fluorescence',
-        'wlbbfl2_sig460nm_adjusted': 'cdom',
-        'wlbbfl2_sig700nm_adjusted': 'opbs'
+        'wlbbfl2_sig695nm_adjusted': 'mass_concentration_of_chlorophyll_a_in_sea_water ',
+        'wlbbfl2_sig460nm_adjusted': 'concentration_of_colored_dissolved_organic_matter_in_sea_water ',
+        'wlbbfl2_sig700nm_adjusted': 'volume_backwards_scattering_coefficient_of_radiative_flux_in_sea_water'
     }
 
     # Keep only variables that exist in the dataset
