@@ -93,16 +93,40 @@ def sg_to_IOOS(filepath):
         if not processed_any:
             print(f"\nSkipping {filepath}: no variables found")
             return
-
+        
         rename_map = {
-            "wlbbfl2_sig695nm_adjusted": "mass_concentration_of_chlorophyll_a_in_sea_water",
-            "wlbbfl2_sig460nm_adjusted": "concentration_of_colored_dissolved_organic_matter_in_sea_water",
-            "wlbbfl2_sig700nm_adjusted": "volume_backwards_scattering_coefficient_of_radiative_flux_in_sea_water",
+            "wlbbfl2_sig695nm_adjusted": "fluorescence",
+            "wlbbfl2_sig460nm_adjusted": "cdom",
+            "wlbbfl2_sig700nm_adjusted": "backscatter",
         }
 
-        rename_map = {k: v for k, v in rename_map.items() if k in ds}
+        # 1) Rename variables
+        rename_map = {old: new for old, new in rename_map.items() if old in ds}
         if rename_map:
             ds = ds.rename_vars(rename_map)
+
+        cf_attrs = {
+            "fluorescence": {
+                "standard_name": "mass_concentration_of_chlorophyll_a_in_sea_water",
+            },
+            "cdom": {
+                "standard_name": "concentration_of_colored_dissolved_organic_matter_in_sea_water",
+            },
+            "backscatter": {
+                "standard_name": "volume_backwards_scattering_coefficient_of_radiative_flux_in_sea_water",
+                "long_name": "Optical Backscattering Coefficient at 700nm",
+            },
+            "dissolved_oxygen": {
+                "standard_name": "moles_of_oxygen_per_unit_mass_in_sea_water",
+            },
+        }
+
+        for var, attrs_map in cf_attrs.items():
+            if var in ds:
+                ds[var].attrs.update(attrs_map)
+
+        if "Conventions" not in ds.attrs:
+            ds.attrs["Conventions"] = "CF-1.10"
 
         out_dir = os.path.join(os.path.dirname(filepath), "gliderdac_proc")
         os.makedirs(out_dir, exist_ok=True)
