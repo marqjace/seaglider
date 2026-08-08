@@ -19,15 +19,25 @@ def sg_to_IOOS(filepath):
         unique_idx = np.sort(unique_idx)
         ds = ds.isel(time=unique_idx)
 
+        # Preserve original time coordinate metadata
+        time_attrs = ds["time"].attrs.copy()
+        time_encoding = ds["time"].encoding.copy()
+
+        def _copy_time_metadata(coord):
+            coord = coord.copy(deep=False)
+            coord.attrs.update(time_attrs)
+            coord.encoding.update(time_encoding)
+            return coord
+
         # Use temperature sampling times when available; otherwise keep native time.
-        target_time = ds["time"]
+        target_time = _copy_time_metadata(ds["time"])
         if "temperature" in ds and "time" in ds["temperature"].dims:
             try:
                 temp_time = ds["temperature"].dropna(dim="time")["time"]
                 if temp_time.size > 0:
-                    target_time = temp_time
+                    target_time = _copy_time_metadata(temp_time)
             except Exception:
-                target_time = ds["time"]
+                target_time = _copy_time_metadata(ds["time"])
 
         vars_to_interp = [
             "wlbbfl2_sig695nm_adjusted",
@@ -79,7 +89,7 @@ def sg_to_IOOS(filepath):
 
                 interp_da = xr.DataArray(
                     interp_v,
-                    coords={"time": target_time.values},
+                    coords={"time": target_time},
                     dims=("time",),
                     name=var,
                 )
@@ -93,7 +103,11 @@ def sg_to_IOOS(filepath):
         if not processed_any:
             print(f"\nSkipping {filepath}: no variables found")
             return
-        
+
+        if "time" in ds.coords:
+            ds["time"].attrs.update(time_attrs)
+            ds["time"].encoding.update(time_encoding)
+
         rename_map = {
             "wlbbfl2_sig695nm_adjusted": "fluorescence",
             "wlbbfl2_sig460nm_adjusted": "cdom",
