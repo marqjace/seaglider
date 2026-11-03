@@ -44,6 +44,9 @@ def sg_to_IOOS(filepath):
             "wlbbfl2_sig460nm_adjusted",
             "wlbbfl2_sig700nm_adjusted",
             "dissolved_oxygen",
+            "wlbb2fl_sig695nm_adjusted",
+            "wlbb2fl_sig460nm_adjusted",
+            "wlbb2fl_sig700nm_adjusted",
         ]
 
         processed_any = False
@@ -108,11 +111,21 @@ def sg_to_IOOS(filepath):
             ds["time"].attrs.update(time_attrs)
             ds["time"].encoding.update(time_encoding)
 
-        rename_map = {
-            "wlbbfl2_sig695nm_adjusted": "fluorescence",
-            "wlbbfl2_sig460nm_adjusted": "cdom",
-            "wlbbfl2_sig700nm_adjusted": "backscatter",
+        sensor_pairs = {
+            "fluorescence": ("wlbbfl2_sig695nm_adjusted", "wlbb2fl_sig695nm_adjusted"),
+            "cdom": ("wlbbfl2_sig460nm_adjusted", "wlbb2fl_sig460nm_adjusted"),
+            "backscatter": ("wlbbfl2_sig700nm_adjusted", "wlbb2fl_sig700nm_adjusted"),
         }
+
+        rename_map = {}
+        for target, candidates in sensor_pairs.items():
+            for old in candidates:
+                if old in ds:
+                    rename_map[old] = target
+                    break  # prefer first available variant
+
+        if rename_map:
+            ds = ds.rename_vars(rename_map)
 
         # 1) Rename variables
         rename_map = {old: new for old, new in rename_map.items() if old in ds}
